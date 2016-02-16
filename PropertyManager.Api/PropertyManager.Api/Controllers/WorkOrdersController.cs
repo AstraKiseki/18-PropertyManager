@@ -15,6 +15,7 @@ using AutoMapper;
 
 namespace PropertyManager.Api.Controllers
 {
+    [Authorize]
     public class WorkOrdersController : ApiController
     {
         private PropertyManagerDataContext db = new PropertyManagerDataContext();
@@ -22,20 +23,22 @@ namespace PropertyManager.Api.Controllers
         // GET: api/WorkOrders
         public IEnumerable<WorkOrderModel> GetWorkOrders()
         {
-            return Mapper.Map<IEnumerable<WorkOrderModel>>(db.WorkOrders);
+            return Mapper.Map<IEnumerable<WorkOrderModel>>(
+                db.WorkOrders.Where(wo => wo.User.UserName == User.Identity.Name
+                ));
         }
 
         // GET: api/WorkOrders/5
         [ResponseType(typeof(WorkOrderModel))]
         public IHttpActionResult GetWorkOrder(int id)
         {
-            WorkOrder workOrder = db.WorkOrders.Find(id);
+            WorkOrder workOrder = db.WorkOrders.FirstOrDefault(wo => wo.User.UserName == User.Identity.Name && wo.WorkOrderId == id);
             if (workOrder == null)
             {
                 return NotFound();
             }
 
-            return Ok(Mapper.Map<IEnumerable<WorkOrderModel>>(workOrder));
+            return Ok(Mapper.Map<WorkOrderModel>(workOrder));
         }
 
         // PUT: api/WorkOrders/5
@@ -52,7 +55,11 @@ namespace PropertyManager.Api.Controllers
                 return BadRequest();
             }
 
-            var dbWorkOrder = db.WorkOrders.Find(id);
+            WorkOrder dbWorkOrder = db.WorkOrders.FirstOrDefault(wo => wo.User.UserName == User.Identity.Name && wo.WorkOrderId == id);
+            if (dbWorkOrder == null)
+            {
+                return BadRequest();
+            }
             dbWorkOrder.Update(modelWorkOrder);
             db.Entry(modelWorkOrder).State = EntityState.Modified;
 
@@ -84,13 +91,14 @@ namespace PropertyManager.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            var newWorkOrder = new WorkOrder();
-            newWorkOrder.Update(workOrder);
+            var dbWorkOrder = new WorkOrder();
+            dbWorkOrder.User = db.Users.FirstOrDefault(u => u.UserName == User.Identity.Name);
+            dbWorkOrder.Update(workOrder);
 
-            db.WorkOrders.Add(newWorkOrder);
+            db.WorkOrders.Add(dbWorkOrder);
             db.SaveChanges();
 
-            workOrder.WorkOrderId = newWorkOrder.WorkOrderId;
+            workOrder.WorkOrderId = dbWorkOrder.WorkOrderId;
 
             return CreatedAtRoute("DefaultApi", new { id = workOrder.WorkOrderId }, workOrder);
         }
@@ -99,7 +107,7 @@ namespace PropertyManager.Api.Controllers
         [ResponseType(typeof(WorkOrder))]
         public IHttpActionResult DeleteWorkOrder(int id)
         {
-            WorkOrder workOrder = db.WorkOrders.Find(id);
+            WorkOrder workOrder = db.WorkOrders.FirstOrDefault(wo => wo.Property.UserId == User.Identity.Name);
             if (workOrder == null)
             {
                 return NotFound();

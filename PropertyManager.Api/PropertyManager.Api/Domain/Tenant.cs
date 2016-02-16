@@ -9,6 +9,8 @@ namespace PropertyManager.Api.Domain
     public class Tenant
     {
         public int TenantId { get; set; }
+        public string UserId { get; set; }
+
         public int? AddressId { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
@@ -29,5 +31,6 @@ namespace PropertyManager.Api.Domain
 
         public virtual ICollection<Lease> Leases { get; set; }
         public virtual ICollection<WorkOrder> WorkOrders { get; set; }
+        public virtual PropertyManagerUser User { get; set; }
     }
 }

@@ -22,6 +22,7 @@ namespace PropertyManager.Api.Domain
 
         public virtual ICollection<Property> Properties { get; set; }
         public virtual ICollection<Tenant> Tenants { get; set; }
+        public virtual PropertyManagerUser User { get; set; }
 
         public void Update(AddressModel modelAddress)
         {

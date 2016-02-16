@@ -8,6 +8,7 @@ namespace PropertyManager.Api.Models
     public class PropertyModel
     {
         public int PropertyId { get; set; }
+        public string UserId { get; set; }
         public int? AddressId { get; set; }
         public string PropertyName { get; set; }
         public int? SquareFeet { get; set; }

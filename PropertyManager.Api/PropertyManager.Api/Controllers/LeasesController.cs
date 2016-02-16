@@ -15,6 +15,7 @@ using PropertyManager.Api.Models;
 
 namespace PropertyManager.Api.Controllers
 {
+    [Authorize]
     public class LeasesController : ApiController
     {
         private PropertyManagerDataContext db = new PropertyManagerDataContext();
@@ -22,20 +23,21 @@ namespace PropertyManager.Api.Controllers
         // GET: api/Leases
         public IEnumerable<LeaseModel>GetLeases()
         {
-            return Mapper.Map<IEnumerable<LeaseModel>>(db.Leases);
+            return Mapper.Map<IEnumerable<LeaseModel>>(
+                db.Leases.Where(l => l.User.UserName == User.Identity.Name));
         }
 
         // GET: api/Leases/5
         [ResponseType(typeof(LeaseModel))]
         public IHttpActionResult GetLease(int id)
         {
-            Lease lease = db.Leases.Find(id);
+            Lease lease = db.Leases.FirstOrDefault(l => l.User.UserName == User.Identity.Name && l.LeaseId == id);
             if (lease == null)
             {
                 return NotFound();
             }
 
-            return Ok(Mapper.Map<IEnumerable<LeaseModel>>(lease));
+            return Ok(Mapper.Map<LeaseModel>(lease));
         }
 
         // PUT: api/Leases/5
@@ -52,7 +54,12 @@ namespace PropertyManager.Api.Controllers
                 return BadRequest();
             }
 
-            var dbLease = db.Leases.Find(id);
+           
+            Lease dbLease = db.Leases.FirstOrDefault(l => l.User.UserName == User.Identity.Name && l.LeaseId == id);
+            if (dbLease == null)
+            {
+                return BadRequest();
+            }
             dbLease.Update(modelLease);
             db.Entry(dbLease).State = EntityState.Modified;
 
@@ -84,13 +91,14 @@ namespace PropertyManager.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            var newLease = new Lease();
-            newLease.Update(lease);
+            var dbLease = new Lease();
+            dbLease.User = db.Users.FirstOrDefault(u => u.UserName == User.Identity.Name);
+            dbLease.Update(lease);
 
-            db.Leases.Add(newLease);
+            db.Leases.Add(dbLease);
             db.SaveChanges();
 
-            lease.LeaseId = newLease.LeaseId;
+            lease.LeaseId = dbLease.LeaseId;
 
             return CreatedAtRoute("DefaultApi", new { id = lease.LeaseId }, lease);
         }
@@ -99,7 +107,7 @@ namespace PropertyManager.Api.Controllers
         [ResponseType(typeof(Lease))]
         public IHttpActionResult DeleteLease(int id)
         {
-            Lease lease = db.Leases.Find(id);
+            Lease lease = db.Leases.FirstOrDefault(l => l.Property.UserId == User.Identity.Name);
             if (lease == null)
             {
                 return NotFound();

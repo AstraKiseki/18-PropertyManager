@@ -28,6 +28,7 @@ namespace PropertyManager.Api.Domain
 
         public virtual Property Property { get; set; }
         public virtual Tenant Tenant { get; set; }
+        public virtual PropertyManagerUser User { get; set; }
 
         public void Update(LeaseModel modelLease)
         {
