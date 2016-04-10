@@ -11,12 +11,12 @@
     </thead>
     <tbody>
         <tr ng-repeat="lease in leases">
-            <td>{{lease.StartDate}}</td>
-            <td>{{lease.EndDate}}</td>
-            <td>{{lease.RentAmount}}</td>
+            <td>{{lease.StartDate | date }}</td>
+            <td>{{lease.EndDate | date }}</td>
+            <td>{{lease.RentAmount | currency: '$'}}</td>
             <td>{{lease.RentFrequency}}</td>
             <td>
-                <a class="btn btn-info" ng-href="#/lease/detail/{{lease.LeaseId}}">
+                <a class="btn btn-info" ng-href="#/app/lease/detail/{{lease.LeaseId}}">
                     Edit
                 </a>
                 <a class="btn btn-danger">

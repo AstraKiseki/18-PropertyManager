@@ -33,7 +33,7 @@ namespace PropertyManager.Api.Infrastructure
                 else
                 {
                     var token = new ClaimsIdentity(context.Options.AuthenticationType);
-                    token.AddClaim(new Claim("sub", context.UserName));
+                    token.AddClaim(new Claim(ClaimTypes.Name, context.UserName));
                     token.AddClaim(new Claim("role", "user"));
 
                     context.Validated(token);
